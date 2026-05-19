@@ -4,52 +4,53 @@
   flex-direction: column;
 }
 
+/* ── Header ── */
 .header {
-  background: #1a1a2e;
+  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #312e81 100%);
   color: white;
-  padding: 28px 24px;
+  padding: 36px 24px 32px;
 }
 
 .headerInner {
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0 auto;
 }
 
 .title {
-  font-size: 1.6rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: white;
 }
 
 .subtitle {
   font-size: 0.875rem;
-  color: rgba(255,255,255,0.55);
-  margin-top: 4px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 6px;
+  font-weight: 400;
 }
 
+/* ── Controls ── */
 .controls {
   background: white;
-  border-bottom: 1px solid #e5e5e5;
-  padding: 16px 24px;
+  border-bottom: 1px solid #e8eaed;
+  padding: 14px 24px;
   position: sticky;
   top: 0;
   z-index: 10;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
 }
 
-.controls > * + * {
-  margin-top: 12px;
-}
-
-@media (min-width: 640px) {
-  .controls {
-    max-width: 100%;
-  }
+.controlsInner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .searchWrap {
   position: relative;
-  max-width: 900px;
-  margin: 0 auto;
 }
 
 .searchIcon {
@@ -57,48 +58,58 @@
   left: 14px;
   top: 50%;
   transform: translateY(-50%);
-  width: 18px;
-  height: 18px;
-  color: #999;
+  width: 17px;
+  height: 17px;
+  color: #9ca3af;
   pointer-events: none;
 }
 
 .searchInput {
   width: 100%;
-  padding: 11px 40px 11px 42px;
-  border: 1.5px solid #ddd;
+  padding: 10px 38px 10px 40px;
+  border: 1.5px solid #e5e7eb;
   border-radius: 10px;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   outline: none;
-  background: #fafafa;
-  transition: border-color 0.15s, background 0.15s;
+  background: #f9fafb;
+  color: #111;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
 }
 
 .searchInput:focus {
-  border-color: #4f46e5;
+  border-color: #6366f1;
   background: white;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+}
+
+.searchInput::placeholder {
+  color: #b0b7c3;
 }
 
 .clearBtn {
   position: absolute;
-  right: 12px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  background: none;
+  background: #e5e7eb;
   border: none;
   cursor: pointer;
-  color: #999;
-  font-size: 0.8rem;
-  padding: 4px;
+  color: #6b7280;
+  font-size: 0.7rem;
+  padding: 3px 6px;
+  border-radius: 999px;
   line-height: 1;
+  transition: background 0.12s;
+}
+
+.clearBtn:hover {
+  background: #d1d5db;
 }
 
 .filters {
-  max-width: 900px;
-  margin: 0 auto;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
@@ -113,29 +124,30 @@
   align-items: center;
   gap: 5px;
   padding: 5px 12px;
-  border-radius: 20px;
-  border: 1.5px solid #e0e0e0;
+  border-radius: 999px;
+  border: 1.5px solid #e5e7eb;
   background: white;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 500;
   cursor: pointer;
-  color: #555;
+  color: #6b7280;
   transition: all 0.12s;
+  white-space: nowrap;
 }
 
 .pill:hover {
-  border-color: #bbb;
-  color: #222;
+  border-color: #9ca3af;
+  color: #374151;
 }
 
 .pillCount {
-  font-size: 0.72rem;
-  color: #999;
+  font-size: 0.68rem;
+  color: #9ca3af;
   font-weight: 400;
 }
 
 .pillActive {
-  border-color: #4f46e5;
+  border-color: #6366f1;
   color: #4f46e5;
   background: #eef2ff;
 }
@@ -147,37 +159,52 @@
 .sortSelect {
   margin-left: auto;
   padding: 6px 10px;
-  border: 1.5px solid #e0e0e0;
+  border: 1.5px solid #e5e7eb;
   border-radius: 8px;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: #555;
   background: white;
   cursor: pointer;
   outline: none;
+  transition: border-color 0.12s;
 }
 
+.sortSelect:focus {
+  border-color: #6366f1;
+}
+
+/* ── Main ── */
 .main {
-  max-width: 900px;
+  max-width: 1100px;
   margin: 0 auto;
   width: 100%;
-  padding: 20px 24px 48px;
+  padding: 24px 24px 60px;
 }
 
 .resultCount {
-  font-size: 0.8rem;
-  color: #888;
-  margin-bottom: 14px;
+  font-size: 0.78rem;
+  color: #9ca3af;
+  margin-bottom: 16px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 640px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .empty {
   text-align: center;
-  color: #999;
+  color: #9ca3af;
   padding: 80px 0;
   font-size: 1rem;
 }
