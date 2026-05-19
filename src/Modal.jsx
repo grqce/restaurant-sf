@@ -25,6 +25,7 @@ export default function Modal({ restaurant, onClose }) {
   }, [onClose])
 
   const { name, address, neighborhood, permitType, latestStatus, latestDate, latestViolations, inspections } = restaurant
+  const latestInspector = inspections[0]?.inspector
   const statusCfg = STATUS_CONFIG[latestStatus] || STATUS_CONFIG['']
   const hasViolations = latestViolations && latestViolations.length > 0
   const pastInspections = inspections.slice(1)
@@ -55,6 +56,12 @@ export default function Modal({ restaurant, onClose }) {
               <div className={styles.metaRow}>
                 <span className={styles.metaDot}>·</span>
                 <span>Last inspected {formatDate(latestDate)}</span>
+              </div>
+            )}
+            {latestInspector && (
+              <div className={styles.metaRow}>
+                <span className={styles.metaDot}>·</span>
+                <span>Inspector: <strong>{latestInspector}</strong></span>
               </div>
             )}
           </div>
@@ -102,6 +109,7 @@ export default function Modal({ restaurant, onClose }) {
                     <th>Date</th>
                     <th>Result</th>
                     <th>Violations</th>
+                    <th>Inspector</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -120,6 +128,7 @@ export default function Modal({ restaurant, onClose }) {
                             ? `${insp.violationCount} violation${insp.violationCount !== 1 ? 's' : ''}`
                             : '—'}
                         </td>
+                        <td>{insp.inspector || '—'}</td>
                       </tr>
                     )
                   })}

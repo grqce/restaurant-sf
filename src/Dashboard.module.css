@@ -1,0 +1,235 @@
+.dashboard {
+  flex: 1;
+}
+
+/* ── Metrics row ── */
+.metricsRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 10px;
+  padding: 20px 24px;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.metric {
+  background: white;
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.metricLabel {
+  font-size: 11px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.metricValue {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.02em;
+}
+
+.metricRed   { color: #A32D2D; }
+.metricAmber { color: #854F0B; }
+.metricGreen { color: #0F6E56; }
+
+/* ── Sub-tab bar ── */
+.tabBar {
+  display: flex;
+  gap: 4px;
+  padding: 8px 24px;
+  background: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+  overflow-x: auto;
+  justify-content: center;
+}
+
+.subTab {
+  padding: 7px 16px;
+  font-size: 13px;
+  cursor: pointer;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: #6b7280;
+  white-space: nowrap;
+  font-family: inherit;
+  font-weight: 500;
+  transition: all 0.12s;
+}
+
+.subTab:hover {
+  background: #e9eaec;
+  color: #374151;
+}
+
+.subTabActive {
+  background: white;
+  color: #4f46e5;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.04);
+}
+
+/* ── Panel ── */
+.panel {
+  padding: 20px 24px 60px;
+  max-width: 1100px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* ── Layout ── */
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 14px;
+}
+
+/* ── Cards ── */
+.card {
+  background: white;
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.cardTitle {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 3px;
+  color: #111827;
+}
+
+.cardSub {
+  font-size: 11px;
+  color: #6b7280;
+  margin-bottom: 14px;
+}
+
+/* ── Insight boxes ── */
+.insightBox {
+  background: #E6F1FB;
+  border-left: 3px solid #6366f1;
+  border-radius: 0 8px 8px 0;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  font-size: 12px;
+  color: #1e1b4b;
+  line-height: 1.6;
+}
+
+.insightRed   { background: #FCEBEB; border-left-color: #A32D2D; color: #501313; }
+.insightAmber { background: #FAEEDA; border-left-color: #854F0B; color: #412402; }
+
+/* ── Tables ── */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.table th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 500;
+  color: #9ca3af;
+  padding: 6px 8px;
+  border-bottom: 1px solid #e5e7eb;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.table td {
+  padding: 7px 8px;
+  border-bottom: 0.5px solid #f3f4f6;
+  vertical-align: middle;
+  color: #374151;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.permitCell {
+  font-size: 11px;
+  color: #9ca3af;
+}
+
+/* ── Pills ── */
+.pill {
+  display: inline-block;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.pillRed   { background: #FCEBEB; color: #A32D2D; }
+.pillAmber { background: #FAEEDA; color: #854F0B; }
+.pillGreen { background: #ECFDF5; color: #065F46; }
+.pillBlue  { background: #EEF2FF; color: #4f46e5; }
+
+/* ── Findings ── */
+.sectionTitle {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 14px;
+  color: #111827;
+}
+
+.finding {
+  background: white;
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 10px;
+  border-left: 3px solid #d1d5db;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.findingCritical   { border-left-color: #A32D2D; }
+.findingNotable    { border-left-color: #BA7517; }
+.findingInteresting { border-left-color: #6366f1; }
+
+.findingTag {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 4px;
+}
+
+.findingCritical    .findingTag { color: #A32D2D; }
+.findingNotable     .findingTag { color: #854F0B; }
+.findingInteresting .findingTag { color: #4f46e5; }
+
+.findingTitle {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #111827;
+}
+
+.findingBody {
+  font-size: 12px;
+  color: #4b5563;
+  line-height: 1.7;
+}
+
+.findingBody strong {
+  font-weight: 600;
+  color: #111827;
+}
+
+@media (max-width: 640px) {
+  .metricsRow { padding: 14px 16px; }
+  .panel { padding: 14px 16px 48px; }
+  .tabBar { padding: 0 16px; }
+  .grid2 { grid-template-columns: 1fr; }
+}

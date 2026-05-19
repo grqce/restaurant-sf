@@ -100,8 +100,21 @@
 }
 
 .violationCount {
-  font-size: 0.78rem;
-  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.violationNumber {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.violationLabel {
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
 .violationCountLow  { color: #6b7280; }

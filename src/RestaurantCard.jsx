@@ -45,7 +45,8 @@ export default function RestaurantCard({ restaurant, onClick }) {
         <div className={styles.footer}>
           {latestViolationCount > 0 ? (
             <span className={`${styles.violationCount} ${violationClass}`}>
-              {latestViolationCount} violation{latestViolationCount !== 1 ? 's' : ''}
+              <span className={styles.violationNumber}>{latestViolationCount}</span>
+              <span className={styles.violationLabel}> violation{latestViolationCount !== 1 ? 's' : ''}</span>
             </span>
           ) : (
             <span className={styles.clean}>No violations</span>

@@ -1,11 +1,13 @@
 import { useState, useEffect, useMemo } from 'react'
 import RestaurantCard from './RestaurantCard.jsx'
 import Modal from './Modal.jsx'
+import Dashboard from './Dashboard.jsx'
 import styles from './App.module.css'
 
 const STATUS_ORDER = { 'Closure': 0, 'Conditional Pass': 1, 'Pass': 2, '': 3 }
 
 export default function App() {
+  const [activeView, setActiveView] = useState('restaurants')
   const [restaurants, setRestaurants] = useState([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
@@ -61,75 +63,95 @@ export default function App() {
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <h1 className={styles.title}>SF Restaurant Health Inspections</h1>
+          <div className={styles.viewTabs}>
+            <button
+              className={`${styles.viewTab} ${activeView === 'restaurants' ? styles.viewTabActive : ''}`}
+              onClick={() => setActiveView('restaurants')}
+            >
+              Restaurants
+            </button>
+            <button
+              className={`${styles.viewTab} ${activeView === 'analysis' ? styles.viewTabActive : ''}`}
+              onClick={() => setActiveView('analysis')}
+            >
+              Analysis
+            </button>
+          </div>
         </div>
       </header>
 
-      <div className={styles.controls}>
-        <div className={styles.controlsInner}>
-          <div className={styles.searchWrap}>
-            <svg className={styles.searchIcon} viewBox="0 0 20 20" fill="none">
-              <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" strokeWidth="1.75"/>
-              <path d="M13 13l4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
-            </svg>
-            <input
-              className={styles.searchInput}
-              type="text"
-              placeholder="Search by name, address, or neighborhood…"
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              autoFocus
-            />
-            {query && (
-              <button className={styles.clearBtn} onClick={() => setQuery('')}>✕</button>
+      {activeView === 'analysis' && <Dashboard />}
+
+      {activeView === 'restaurants' && (
+        <>
+          <div className={styles.controls}>
+            <div className={styles.controlsInner}>
+              <div className={styles.searchWrap}>
+                <svg className={styles.searchIcon} viewBox="0 0 20 20" fill="none">
+                  <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" strokeWidth="1.75"/>
+                  <path d="M13 13l4 4" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round"/>
+                </svg>
+                <input
+                  className={styles.searchInput}
+                  type="text"
+                  placeholder="Search by name, address, or neighborhood…"
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
+                  autoFocus
+                />
+                {query && (
+                  <button className={styles.clearBtn} onClick={() => setQuery('')}>✕</button>
+                )}
+              </div>
+
+              <div className={styles.filters}>
+                <div className={styles.statusPills}>
+                  {['All', 'Pass', 'Conditional Pass', 'Closure'].map(s => (
+                    <button
+                      key={s}
+                      className={`${styles.pill} ${statusFilter === s ? styles.pillActive : ''}`}
+                      onClick={() => setStatusFilter(s)}
+                    >
+                      {s}
+                      <span className={styles.pillCount}>
+                        {s === 'All' ? restaurants.length.toLocaleString() : (counts[s] || 0).toLocaleString()}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                <select className={styles.sortSelect} value={sortBy} onChange={e => setSortBy(e.target.value)}>
+                  <option value="name">Name A–Z</option>
+                  <option value="violations_desc">Most Violations</option>
+                  <option value="status">Worst Status First</option>
+                  <option value="date">Most Recent</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <main className={styles.main}>
+            {loading ? (
+              <div className={styles.empty}>Loading…</div>
+            ) : filtered.length === 0 ? (
+              <div className={styles.empty}>No results for "{query}"</div>
+            ) : (
+              <>
+                <p className={styles.resultCount}>
+                  {filtered.length.toLocaleString()} result{filtered.length !== 1 ? 's' : ''}
+                </p>
+                <div className={styles.grid}>
+                  {filtered.map(r => (
+                    <RestaurantCard key={r.id} restaurant={r} onClick={() => setSelected(r)} />
+                  ))}
+                </div>
+              </>
             )}
-          </div>
+          </main>
 
-          <div className={styles.filters}>
-            <div className={styles.statusPills}>
-              {['All', 'Pass', 'Conditional Pass', 'Closure'].map(s => (
-                <button
-                  key={s}
-                  className={`${styles.pill} ${statusFilter === s ? styles.pillActive : ''}`}
-                  onClick={() => setStatusFilter(s)}
-                >
-                  {s}
-                  <span className={styles.pillCount}>
-                    {s === 'All' ? restaurants.length.toLocaleString() : (counts[s] || 0).toLocaleString()}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            <select className={styles.sortSelect} value={sortBy} onChange={e => setSortBy(e.target.value)}>
-              <option value="name">Name A–Z</option>
-              <option value="violations_desc">Most Violations</option>
-              <option value="status">Worst Status First</option>
-              <option value="date">Most Recent</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
-      <main className={styles.main}>
-        {loading ? (
-          <div className={styles.empty}>Loading…</div>
-        ) : filtered.length === 0 ? (
-          <div className={styles.empty}>No results for "{query}"</div>
-        ) : (
-          <>
-            <p className={styles.resultCount}>
-              {filtered.length.toLocaleString()} result{filtered.length !== 1 ? 's' : ''}
-            </p>
-            <div className={styles.grid}>
-              {filtered.map(r => (
-                <RestaurantCard key={r.id} restaurant={r} onClick={() => setSelected(r)} />
-              ))}
-            </div>
-          </>
-        )}
-      </main>
-
-      {selected && <Modal restaurant={selected} onClose={() => setSelected(null)} />}
+          {selected && <Modal restaurant={selected} onClose={() => setSelected(null)} />}
+        </>
+      )}
     </div>
   )
 }
