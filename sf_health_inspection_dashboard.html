@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SF Health Inspection — Causation Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f4f3ef; color: #1a1a18; font-size: 14px; }
+.header { background: #fff; border-bottom: 0.5px solid #d3d1c7; padding: 1.25rem 1.5rem; }
+.header h1 { font-size: 20px; font-weight: 500; margin-bottom: 2px; }
+.header p { font-size: 13px; color: #5f5e5a; }
+.summary-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; padding: 1.25rem 1.5rem; }
+.metric { background: #fff; border-radius: 10px; padding: 12px 14px; }
+.metric-label { font-size: 11px; color: #888780; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.metric-value { font-size: 24px; font-weight: 500; }
+.metric-value.red { color: #A32D2D; }
+.metric-value.amber { color: #854F0B; }
+.metric-value.green { color: #0F6E56; }
+.tabs { display: flex; gap: 2px; padding: 0 1.5rem; background: #f4f3ef; border-bottom: 1px solid #d3d1c7; }
+.tab { padding: 10px 16px; font-size: 13px; cursor: pointer; border-bottom: 2px solid transparent; color: #5f5e5a; white-space: nowrap; }
+.tab.active { border-bottom-color: #378ADD; color: #185FA5; font-weight: 500; }
+.tab:hover { color: #1a1a18; }
+.panel { display: none; padding: 1.25rem 1.5rem; }
+.panel.active { display: block; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; }
+.card { background: #fff; border-radius: 10px; padding: 1.1rem 1.25rem; }
+.card-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.card-sub { font-size: 11px; color: #5f5e5a; margin-bottom: 14px; }
+.insight-box { background: #E6F1FB; border-left: 3px solid #378ADD; border-radius: 0 8px 8px 0; padding: 10px 14px; margin-bottom: 10px; font-size: 12px; color: #0C447C; line-height: 1.6; }
+.insight-box.red { background: #FCEBEB; border-left-color: #A32D2D; color: #501313; }
+.insight-box.amber { background: #FAEEDA; border-left-color: #854F0B; color: #412402; }
+.insight-box.teal { background: #E1F5EE; border-left-color: #0F6E56; color: #04342C; }
+.insight-box strong { font-weight: 500; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th { text-align: left; font-size: 11px; font-weight: 500; color: #888780; padding: 6px 8px; border-bottom: 1px solid #e8e6df; text-transform: uppercase; letter-spacing: 0.05em; }
+td { padding: 7px 8px; border-bottom: 0.5px solid #f1efe8; vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+.bar-cell { display: flex; align-items: center; gap: 6px; }
+.mini-bar { height: 6px; border-radius: 3px; flex-shrink: 0; }
+.pill { display: inline-block; font-size: 10px; padding: 1px 7px; border-radius: 10px; font-weight: 500; }
+.pill-red { background: #FCEBEB; color: #A32D2D; }
+.pill-amber { background: #FAEEDA; color: #854F0B; }
+.pill-green { background: #EAF3DE; color: #3B6D11; }
+.pill-blue { background: #E6F1FB; color: #185FA5; }
+.section-title { font-size: 15px; font-weight: 500; margin-bottom: 12px; margin-top: 20px; }
+.section-title:first-child { margin-top: 0; }
+.finding { background: #fff; border-radius: 10px; padding: 1.1rem 1.25rem; margin-bottom: 10px; border-left: 3px solid #d3d1c7; }
+.finding.critical { border-left-color: #A32D2D; }
+.finding.notable { border-left-color: #BA7517; }
+.finding.interesting { border-left-color: #378ADD; }
+.finding-tag { font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+.finding.critical .finding-tag { color: #A32D2D; }
+.finding.notable .finding-tag { color: #854F0B; }
+.finding.interesting .finding-tag { color: #185FA5; }
+.finding-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+.finding-body { font-size: 12px; color: #444441; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>SF Health Inspection — Causation Analysis</h1>
+  <p>21,394 inspections · Jan 2024 – May 2026 · What actually drives failures and closures?</p>
+</div>
+
+<div class="summary-row">
+  <div class="metric"><div class="metric-label">Total inspections</div><div class="metric-value">21,394</div></div>
+  <div class="metric"><div class="metric-label">Closures</div><div class="metric-value red">450</div></div>
+  <div class="metric"><div class="metric-label">Conditional pass</div><div class="metric-value amber">663</div></div>
+  <div class="metric"><div class="metric-label">Pass rate</div><div class="metric-value green">87.2%</div></div>
+  <div class="metric"><div class="metric-label">Avg violations</div><div class="metric-value">4.0</div></div>
+  <div class="metric"><div class="metric-label">Worst inspector FR</div><div class="metric-value red">15.4%</div></div>
+  <div class="metric"><div class="metric-label">Best inspector FR</div><div class="metric-value green">0.0%</div></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="show('findings')">Key Findings</div>
+  <div class="tab" onclick="show('neighborhood')">By Neighborhood</div>
+  <div class="tab" onclick="show('inspector')">Inspector Variance</div>
+  <div class="tab" onclick="show('timing')">Timing Patterns</div>
+  <div class="tab" onclick="show('permit')">Permit Type</div>
+  <div class="tab" onclick="show('repeat')">Repeat Offenders</div>
+</div>
+
+<!-- FINDINGS -->
+<div id="panel-findings" class="panel active">
+  <p class="section-title">What actually causes failures — 6 findings from 21K inspections</p>
+
+  <div class="finding critical">
+    <div class="finding-tag">Critical · Inspector effect</div>
+    <div class="finding-title">The same restaurant would likely get different outcomes depending on who shows up</div>
+    <div class="finding-body">Inspector failure rates range from <strong>0% to 15.4%</strong> — a 15x gap. In the Mission neighborhood alone, one inspector (Jessica Jang) failed 20% of restaurants while another (Sharon Aguila-Leonard) failed 0% across 50 inspections. This isn't fully explained by territory differences. It suggests a significant subjective component in what counts as a "failure." A logistic regression model trained on neighborhood + permit type + timing achieves only AUC 0.667, confirming that inspector identity is an unmodeled variable with major explanatory power.</div>
+  </div>
+
+  <div class="finding critical">
+    <div class="finding-tag">Critical · Temporal effect</div>
+    <div class="finding-title">Monday inspections fail at nearly double the rate of Friday inspections</div>
+    <div class="finding-body">Monday failure rate: <strong>7.2%</strong>. Friday failure rate: <strong>3.7%</strong>. The gradient is monotonic — each day of the week is safer than the one before it. This is a classic "inspector fatigue in reverse" — inspectors may be more vigilant early in the week, or restaurants may be less prepared at the start of the week after weekend operations. Either way, your inspection day matters almost as much as your violations.</div>
+  </div>
+
+  <div class="finding notable">
+    <div class="finding-tag">Notable · Seasonal effect</div>
+    <div class="finding-title">Summer and fall are meaningfully more dangerous than spring</div>
+    <div class="finding-body">Failure rates spike in <strong>August–September (6.3–6.4%)</strong> and dip to a low of <strong>4.0% in April</strong>. This is likely a real food safety signal: warmer temperatures increase bacterial growth risk, and restaurants under-equipped for temperature control fail more. The seasonal pattern in average violations follows the same curve, suggesting this is about actual conditions, not just inspector behavior.</div>
+  </div>
+
+  <div class="finding notable">
+    <div class="finding-tag">Notable · Geography</div>
+    <div class="finding-title">Japantown fails at 3.5x the rate of Potrero Hill — even controlling for restaurant type</div>
+    <div class="finding-body">Japantown: <strong>13.2% failure rate</strong>. Oceanview/Merced/Ingleside: <strong>10.5%</strong>. Potrero Hill: <strong>0.2%</strong>. The neighborhood effect is large and persistent. High-violation neighborhoods (Mission avg 5.1 violations, Lakeshore 5.6) cluster differently from high-failure-rate neighborhoods, suggesting that violations alone don't explain geography — enforcement patterns and business demographics matter too.</div>
+  </div>
+
+  <div class="finding interesting">
+    <div class="finding-tag">Interesting · Permit type</div>
+    <div class="finding-title">Farmers markets close more than restaurants — but for different reasons</div>
+    <div class="finding-body">Certified Farmers Markets have a <strong>6.5% closure rate</strong> vs 2.7% for small restaurants. But their average violation count is only 1.75 — the lowest of any category. This suggests closures are triggered by permit/licensing issues rather than food safety violations. Three farmers market operators have each been closed 3 times, pointing to a systemic compliance gap in how temporary vendors manage their permits.</div>
+  </div>
+
+  <div class="finding interesting">
+    <div class="finding-tag">Interesting · Repeat behavior</div>
+    <div class="finding-title">A small number of businesses account for a disproportionate share of closures</div>
+    <div class="finding-body">Two restaurants have been closed <strong>5 times</strong> since Jan 2024 and are still operating. Five have been closed 4 times. The city's enforcement model appears to allow repeated closure-and-reopening rather than escalating to license revocation. This is either a policy gap or a data artifact worth investigating in person.</div>
+  </div>
+</div>
+
+<!-- NEIGHBORHOOD -->
+<div id="panel-neighborhood" class="panel">
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Failure rate by neighborhood</div>
+      <div class="card-sub">% of inspections resulting in Closure or Conditional Pass (min 20 inspections)</div>
+      <div style="position:relative;height:520px;"><canvas id="nbChart" role="img" aria-label="Bar chart of failure rates by SF neighborhood"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Average violations by neighborhood</div>
+      <div class="card-sub">Mean violation count per inspection (includes pass inspections)</div>
+      <div style="position:relative;height:520px;"><canvas id="nbViolChart" role="img" aria-label="Bar chart of average violations by neighborhood"></canvas></div>
+    </div>
+  </div>
+  <div style="height:14px"></div>
+  <div class="card">
+    <div class="card-title">Neighborhood detail table</div>
+    <div class="card-sub">Sorted by failure rate descending</div>
+    <table>
+      <thead><tr><th>Neighborhood</th><th>Inspections</th><th>Failure rate</th><th>Closure rate</th><th>Avg violations</th></tr></thead>
+      <tbody id="nbTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- INSPECTOR -->
+<div id="panel-inspector" class="panel">
+  <div class="insight-box red"><strong>Major finding:</strong> Inspector failure rates span 0% to 15.4% — a 15x gap that can't be explained by territory alone. In the Mission, the same block can see a 0% or 20% failure rate depending purely on who shows up.</div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Inspector failure rates</div>
+      <div class="card-sub">Inspectors with ≥100 inspections. Red = above-average failure rate.</div>
+      <div style="position:relative;height:600px;"><canvas id="insChart" role="img" aria-label="Horizontal bar chart of inspector failure rates"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Inspector avg violations vs failure rate</div>
+      <div class="card-sub">High violations + high failures = strict. High violations + low failures = lenient on pass/fail threshold.</div>
+      <div style="position:relative;height:600px;"><canvas id="insScatter" role="img" aria-label="Scatter plot of inspector violations vs failure rate"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- TIMING -->
+<div id="panel-timing" class="panel">
+  <div class="insight-box amber"><strong>Timing matters:</strong> Monday inspections fail at 7.2% vs 3.7% on Fridays. Summer/fall failure rates run 60% higher than spring. When you get inspected predicts outcomes almost as much as what the inspector finds.</div>
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">Failure rate by day of week</div>
+      <div class="card-sub">Monday inspections fail at nearly double the Friday rate</div>
+      <div style="position:relative;height:280px;"><canvas id="dowChart" role="img" aria-label="Bar chart of failure rate by day of week"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Failure rate by month</div>
+      <div class="card-sub">Summer spike likely reflects temperature-driven food safety failures</div>
+      <div style="position:relative;height:280px;"><canvas id="monthChart" role="img" aria-label="Line chart of failure rate by month"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Avg violations by day of week</div>
+      <div class="card-sub">Violations also peak on Monday — consistent signal, not just threshold-setting</div>
+      <div style="position:relative;height:280px;"><canvas id="dowViolChart" role="img" aria-label="Bar chart of avg violations by day of week"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Avg violations by month</div>
+      <div class="card-sub">Violation counts track failure rates — summer is genuinely worse</div>
+      <div style="position:relative;height:280px;"><canvas id="monthViolChart" role="img" aria-label="Line chart of avg violations by month"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- PERMIT TYPE -->
+<div id="panel-permit" class="panel">
+  <div class="insight-box"><strong>Permit type effect:</strong> Certified Farmers Markets have a 6.5% closure rate despite the lowest violation counts — suggesting permit/licensing failures drive closures there, not food safety. Retail markets with food prep fail more than restaurants of equivalent size.</div>
+  <div class="grid2">
+    <div class="card" style="grid-column: 1 / -1;">
+      <div class="card-title">Failure rate by permit type (top 20, min 30 inspections)</div>
+      <div class="card-sub">Failure = Closure + Conditional Pass</div>
+      <div style="position:relative;height:420px;"><canvas id="ptChart" role="img" aria-label="Horizontal bar chart of failure rates by permit type"></canvas></div>
+    </div>
+  </div>
+</div>
+
+<!-- REPEAT -->
+<div id="panel-repeat" class="panel">
+  <div class="insight-box red"><strong>Enforcement gap:</strong> Two restaurants have been closed 5 times since January 2024. Five have been closed 4 times. All are still operating. The city's closure-and-reopen cycle appears to have no escalation mechanism.</div>
+  <div class="card">
+    <div class="card-title">Businesses with 2+ closures since Jan 2024</div>
+    <div class="card-sub">Sorted by closure count</div>
+    <table>
+      <thead><tr><th>Business</th><th>Neighborhood</th><th>Type</th><th>Closures</th></tr></thead>
+      <tbody id="repeatTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const nb = [{"analysis_neighborhood":"Japantown","total":227,"failures":30,"closures":7,"avg_violations":4.18,"failure_rate":13.2,"closure_rate":3.1},{"analysis_neighborhood":"Oceanview/Merced/Ingleside","total":124,"failures":13,"closures":9,"avg_violations":7.06,"failure_rate":10.5,"closure_rate":7.3},{"analysis_neighborhood":"Glen Park","total":64,"failures":5,"closures":2,"avg_violations":4.25,"failure_rate":7.8,"closure_rate":3.1},{"analysis_neighborhood":"Bernal Heights","total":333,"failures":26,"closures":13,"avg_violations":5.01,"failure_rate":7.8,"closure_rate":3.9},{"analysis_neighborhood":"North Beach","total":999,"failures":78,"closures":36,"avg_violations":4.49,"failure_rate":7.8,"closure_rate":3.6},{"analysis_neighborhood":"Mission","total":2685,"failures":204,"closures":72,"avg_violations":5.07,"failure_rate":7.6,"closure_rate":2.7},{"analysis_neighborhood":"Chinatown","total":1372,"failures":100,"closures":44,"avg_violations":4.54,"failure_rate":7.3,"closure_rate":3.2},{"analysis_neighborhood":"Outer Mission","total":154,"failures":11,"closures":5,"avg_violations":3.75,"failure_rate":7.1,"closure_rate":3.2},{"analysis_neighborhood":"Marina","total":588,"failures":42,"closures":6,"avg_violations":3.16,"failure_rate":7.1,"closure_rate":1.0},{"analysis_neighborhood":"Lakeshore","total":300,"failures":21,"closures":13,"avg_violations":5.64,"failure_rate":7.0,"closure_rate":4.3},{"analysis_neighborhood":"Castro/Upper Market","total":468,"failures":32,"closures":12,"avg_violations":3.47,"failure_rate":6.8,"closure_rate":2.6},{"analysis_neighborhood":"Sunset/Parkside","total":1061,"failures":72,"closures":32,"avg_violations":3.51,"failure_rate":6.8,"closure_rate":3.0},{"analysis_neighborhood":"Noe Valley","total":300,"failures":19,"closures":9,"avg_violations":4.89,"failure_rate":6.3,"closure_rate":3.0},{"analysis_neighborhood":"Excelsior","total":247,"failures":14,"closures":7,"avg_violations":3.44,"failure_rate":5.7,"closure_rate":2.8},{"analysis_neighborhood":"West of Twin Peaks","total":413,"failures":23,"closures":11,"avg_violations":4.97,"failure_rate":5.6,"closure_rate":2.7},{"analysis_neighborhood":"South of Market","total":760,"failures":40,"closures":22,"avg_violations":4.03,"failure_rate":5.3,"closure_rate":2.9},{"analysis_neighborhood":"Lone Mountain/USF","total":165,"failures":8,"closures":1,"avg_violations":3.63,"failure_rate":4.8,"closure_rate":0.6},{"analysis_neighborhood":"Outer Richmond","total":687,"failures":32,"closures":11,"avg_violations":3.86,"failure_rate":4.7,"closure_rate":1.6},{"analysis_neighborhood":"Hayes Valley","total":514,"failures":23,"closures":12,"avg_violations":3.0,"failure_rate":4.5,"closure_rate":2.3},{"analysis_neighborhood":"Presidio Heights","total":112,"failures":5,"closures":1,"avg_violations":3.45,"failure_rate":4.5,"closure_rate":0.9},{"analysis_neighborhood":"Financial District/South Beach","total":2429,"failures":91,"closures":35,"avg_violations":3.49,"failure_rate":3.7,"closure_rate":1.4},{"analysis_neighborhood":"Inner Sunset","total":533,"failures":20,"closures":2,"avg_violations":3.14,"failure_rate":3.8,"closure_rate":0.4},{"analysis_neighborhood":"Tenderloin","total":1728,"failures":63,"closures":35,"avg_violations":3.65,"failure_rate":3.6,"closure_rate":2.0},{"analysis_neighborhood":"Inner Richmond","total":459,"failures":15,"closures":7,"avg_violations":3.78,"failure_rate":3.3,"closure_rate":1.5},{"analysis_neighborhood":"Nob Hill","total":695,"failures":30,"closures":12,"avg_violations":3.83,"failure_rate":4.3,"closure_rate":1.7},{"analysis_neighborhood":"Haight Ashbury","total":277,"failures":7,"closures":2,"avg_violations":4.33,"failure_rate":2.5,"closure_rate":0.7},{"analysis_neighborhood":"Western Addition","total":315,"failures":8,"closures":3,"avg_violations":3.2,"failure_rate":2.5,"closure_rate":1.0},{"analysis_neighborhood":"Bayview Hunters Point","total":734,"failures":22,"closures":11,"avg_violations":3.52,"failure_rate":3.0,"closure_rate":1.5},{"analysis_neighborhood":"Mission Bay","total":1088,"failures":32,"closures":7,"avg_violations":3.07,"failure_rate":2.9,"closure_rate":0.6},{"analysis_neighborhood":"Pacific Heights","total":353,"failures":4,"closures":2,"avg_violations":3.75,"failure_rate":1.1,"closure_rate":0.6},{"analysis_neighborhood":"Potrero Hill","total":412,"failures":1,"closures":0,"avg_violations":3.68,"failure_rate":0.2,"closure_rate":0.0}];
+
+const ins = [{"inspector":"Cristina Fung-Autry","total":408,"failures":63,"avg_violations":8.04,"failure_rate":15.4},{"inspector":"Michael Mooney","total":1380,"failures":180,"avg_violations":4.71,"failure_rate":13.0},{"inspector":"Amelia Castelli","total":496,"failures":56,"avg_violations":2.5,"failure_rate":11.3},{"inspector":"Usman Javaid","total":154,"failures":17,"avg_violations":3.85,"failure_rate":11.0},{"inspector":"Carlos Barragan","total":483,"failures":47,"avg_violations":5.23,"failure_rate":9.7},{"inspector":"Maribel Rodriguez","total":807,"failures":69,"avg_violations":5.12,"failure_rate":8.6},{"inspector":"Katie Dea","total":998,"failures":83,"avg_violations":4.03,"failure_rate":8.3},{"inspector":"Tiombe Wiley","total":575,"failures":42,"avg_violations":3.87,"failure_rate":7.3},{"inspector":"Sojeatta Khim","total":130,"failures":9,"avg_violations":4.57,"failure_rate":6.9},{"inspector":"Jessica Jang","total":403,"failures":28,"avg_violations":4.57,"failure_rate":6.9},{"inspector":"Patrick Wood","total":1192,"failures":80,"avg_violations":3.01,"failure_rate":6.7},{"inspector":"Katherine Tuazon","total":167,"failures":11,"avg_violations":4.22,"failure_rate":6.6},{"inspector":"Christina Lee","total":307,"failures":19,"avg_violations":3.41,"failure_rate":6.2},{"inspector":"Alyssa Manzano","total":456,"failures":28,"avg_violations":3.89,"failure_rate":6.1},{"inspector":"William Bajjalieh","total":1133,"failures":68,"avg_violations":2.81,"failure_rate":6.0},{"inspector":"Roy Bwogi","total":388,"failures":21,"avg_violations":3.95,"failure_rate":5.4},{"inspector":"Aron Wong","total":414,"failures":22,"avg_violations":2.67,"failure_rate":5.3},{"inspector":"Luz Brown","total":822,"failures":35,"avg_violations":6.74,"failure_rate":4.3},{"inspector":"John Wells","total":1475,"failures":58,"avg_violations":4.08,"failure_rate":3.9},{"inspector":"Montre Tieu","total":126,"failures":4,"avg_violations":4.28,"failure_rate":3.2},{"inspector":"Abel Simon","total":258,"failures":8,"avg_violations":3.1,"failure_rate":3.1},{"inspector":"Joanna Huber","total":416,"failures":12,"avg_violations":5.75,"failure_rate":2.9},{"inspector":"Amy Johnson","total":861,"failures":24,"avg_violations":4.18,"failure_rate":2.8},{"inspector":"Kristine Der","total":462,"failures":12,"avg_violations":6.71,"failure_rate":2.6},{"inspector":"Farhan Khan","total":675,"failures":17,"avg_violations":2.83,"failure_rate":2.5},{"inspector":"Sharon Aguila-Leonard","total":941,"failures":22,"avg_violations":2.59,"failure_rate":2.3},{"inspector":"Sophia Huie","total":943,"failures":21,"avg_violations":3.28,"failure_rate":2.2},{"inspector":"Jesus Zapien","total":754,"failures":11,"avg_violations":2.31,"failure_rate":1.5},{"inspector":"Zack Parsons","total":686,"failures":9,"avg_violations":3.1,"failure_rate":1.3},{"inspector":"Danny Nguyen","total":253,"failures":2,"avg_violations":2.4,"failure_rate":0.8},{"inspector":"Rochelle Veloso","total":637,"failures":1,"avg_violations":5.62,"failure_rate":0.2},{"inspector":"Albert Felipe","total":112,"failures":0,"avg_violations":1.83,"failure_rate":0.0},{"inspector":"Ivy Phan","total":148,"failures":0,"avg_violations":1.41,"failure_rate":0.0}];
+
+const dow = [{"dow":"Monday","total":2276,"failures":164,"avg_violations":4.54,"failure_rate":7.2},{"dow":"Tuesday","total":5033,"failures":302,"avg_violations":4.17,"failure_rate":6.0},{"dow":"Wednesday","total":5368,"failures":280,"avg_violations":4.04,"failure_rate":5.2},{"dow":"Thursday","total":4820,"failures":224,"avg_violations":4.0,"failure_rate":4.6},{"dow":"Friday","total":3613,"failures":132,"avg_violations":3.59,"failure_rate":3.7},{"dow":"Saturday","total":125,"failures":1,"avg_violations":2.29,"failure_rate":0.8},{"dow":"Sunday","total":159,"failures":10,"avg_violations":1.61,"failure_rate":6.3}];
+
+const monthly = [{"month":1,"total":2322,"failures":129,"avg_violations":3.93,"failure_rate":5.6,"month_name":"Jan"},{"month":2,"total":2188,"failures":117,"avg_violations":3.98,"failure_rate":5.3,"month_name":"Feb"},{"month":3,"total":2306,"failures":104,"avg_violations":4.09,"failure_rate":4.5,"month_name":"Mar"},{"month":4,"total":2642,"failures":107,"avg_violations":3.99,"failure_rate":4.0,"month_name":"Apr"},{"month":5,"total":2518,"failures":114,"avg_violations":3.81,"failure_rate":4.5,"month_name":"May"},{"month":6,"total":1825,"failures":110,"avg_violations":4.04,"failure_rate":6.0,"month_name":"Jun"},{"month":7,"total":1277,"failures":66,"avg_violations":4.19,"failure_rate":5.2,"month_name":"Jul"},{"month":8,"total":1411,"failures":89,"avg_violations":4.37,"failure_rate":6.3,"month_name":"Aug"},{"month":9,"total":1092,"failures":70,"avg_violations":4.42,"failure_rate":6.4,"month_name":"Sep"},{"month":10,"total":1317,"failures":77,"avg_violations":3.93,"failure_rate":5.8,"month_name":"Oct"},{"month":11,"total":1197,"failures":62,"avg_violations":3.94,"failure_rate":5.2,"month_name":"Nov"},{"month":12,"total":1299,"failures":68,"avg_violations":3.94,"failure_rate":5.2,"month_name":"Dec"}];
+
+const pt = [{"label":"RETAIL MKTS W/O PREP (OVER 20000)","failure_rate":12.9,"closure_rate":3.2,"total":31},{"label":"RETAIL MKTS W/FOOD PREP (5001-10000)","failure_rate":8.0,"closure_rate":5.3,"total":75},{"label":"RESTAURANT 1,000-2,000 SQFT","failure_rate":7.5,"closure_rate":3.2,"total":4762},{"label":"RESTAURANT OVER 2,000 SQFT","failure_rate":7.3,"closure_rate":2.6,"total":3681},{"label":"TAKE-OUTS","failure_rate":7.2,"closure_rate":2.8,"total":432},{"label":"CERTIFIED FARMERS MARKETS","failure_rate":7.2,"closure_rate":6.5,"total":153},{"label":"RETAIL MKTS W/O PREP (5001-10000)","failure_rate":7.0,"closure_rate":0.0,"total":71},{"label":"RESTAURANT UNDER 1,000 SQFT","failure_rate":6.6,"closure_rate":2.7,"total":3843},{"label":"SUPERMARKETS >20K SQFT","failure_rate":6.5,"closure_rate":4.3,"total":46},{"label":"RETAIL MKTS W/O PREP (10001-20000)","failure_rate":6.2,"closure_rate":1.5,"total":65},{"label":"RETAIL BAKERIES WITH FOOD PREP","failure_rate":5.5,"closure_rate":3.0,"total":200},{"label":"RETAIL MKTS W/FOOD PREP <5001","failure_rate":5.4,"closure_rate":1.6,"total":1015},{"label":"FOOD PREP AND SERVICE (FEE EXEMPT)","failure_rate":5.0,"closure_rate":3.4,"total":179},{"label":"RETAIL MKTS W/FOOD PREP (10001-20000)","failure_rate":4.7,"closure_rate":0.9,"total":106},{"label":"COMMISSARIES","failure_rate":4.0,"closure_rate":3.0,"total":100}];
+
+const repeat = [{"dba":"YARSA NEPALESE CUISINE","neighborhood":"North Beach","permit_type":"H24 - RESTAURANT UNDER 1,000 SQFT","closure_count":5},{"dba":"GOLDEN FLOWER VIETNAMESE RESTA","neighborhood":"Chinatown","permit_type":"H24 - RESTAURANT UNDER 1,000 SQFT","closure_count":5},{"dba":"PICA PICA","neighborhood":"Mission","permit_type":"H25 - RESTAURANT 1,000 - 2,000 SQFT","closure_count":4},{"dba":"LA FLOR DE IZOTE","neighborhood":"Bernal Heights","permit_type":"H24 - RESTAURANT UNDER 1,000 SQFT","closure_count":4},{"dba":"LINDO YUCATAN","neighborhood":"Tenderloin","permit_type":"H24 - RESTAURANT UNDER 1,000 SQFT","closure_count":4},{"dba":"AGRICULTURAL INSTITUTE OF MARIN","neighborhood":"Inner Richmond","permit_type":"H14 - CERTIFIED FARMERS MARKETS","closure_count":3},{"dba":"DIVISADERO CFM","neighborhood":"Hayes Valley","permit_type":"H14 - CERTIFIED FARMERS MARKETS","closure_count":3},{"dba":"SUNSET MERCANTILE / OUTER SUNSET FARMERS MARKET","neighborhood":"Sunset/Parkside","permit_type":"H14 - CERTIFIED FARMERS MARKETS","closure_count":3},{"dba":"B & J 1/4LB BURGER","neighborhood":"Bayview Hunters Point","permit_type":"H24 - RESTAURANT UNDER 1,000 SQFT","closure_count":3},{"dba":"NEW CHEUNG HING RESTAURANT","neighborhood":"Sunset/Parkside","permit_type":"H25 - RESTAURANT 1,000 - 2,000 SQFT","closure_count":3},{"dba":"VANIDA THAI KITCHEN","neighborhood":"Sunset/Parkside","permit_type":"H24 - RESTAURANT UNDER 1,000 SQFT","closure_count":3},{"dba":"DELICIOUS DIMSUM","neighborhood":"Chinatown","permit_type":"H24 - RESTAURANT UNDER 1,000 SQFT","closure_count":3},{"dba":"COCOBANG","neighborhood":"Tenderloin","permit_type":"H24 - RESTAURANT UNDER 1,000 SQFT","closure_count":3},{"dba":"NOE INDIAN CUISINE","neighborhood":"Noe Valley","permit_type":"H25 - RESTAURANT 1,000 - 2,000 SQFT","closure_count":3},{"dba":"RHEA'S MARKET & DELI","neighborhood":"Mission","permit_type":"H07 - RETAIL MKTS W/FOOD PREP","closure_count":3},{"dba":"CHEESEBOAT","neighborhood":"North Beach","permit_type":"H25 - RESTAURANT 1,000 - 2,000 SQFT","closure_count":3},{"dba":"NICK'S LIGHTHOUSE","neighborhood":"Financial District/South Beach","permit_type":"H33 - COMMISSARIES","closure_count":3},{"dba":"DOSA CORNER INDIAN CUISINE","neighborhood":"Mission","permit_type":"H25 - RESTAURANT 1,000 - 2,000 SQFT","closure_count":3},{"dba":"FAIRMONT SAN FRANCISCO","neighborhood":"Nob Hill","permit_type":"H26 - RESTAURANT OVER 2,000 SQFT","closure_count":3},{"dba":"TCM FORTUNE","neighborhood":"Outer Richmond","permit_type":"H25 - RESTAURANT 1,000 - 2,000 SQFT","closure_count":3}];
+
+const AVG_FR = 5.4;
+
+function show(tab) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector(`[onclick="show('${tab}')"]`).classList.add('active');
+  document.getElementById(`panel-${tab}`).classList.add('active');
+}
+
+// Neighborhood bar chart
+const nbSorted = [...nb].sort((a,b) => b.failure_rate - a.failure_rate);
+new Chart(document.getElementById('nbChart'), {
+  type: 'bar',
+  data: {
+    labels: nbSorted.map(d => d.analysis_neighborhood),
+    datasets: [{
+      label: 'Failure rate %',
+      data: nbSorted.map(d => d.failure_rate),
+      backgroundColor: nbSorted.map(d => d.failure_rate > AVG_FR ? '#E24B4A' : '#85B7EB'),
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { x: { title: { display: true, text: 'Failure rate (%)' } } }
+  }
+});
+
+// Neighborhood violations
+const nbViolSorted = [...nb].sort((a,b) => b.avg_violations - a.avg_violations);
+new Chart(document.getElementById('nbViolChart'), {
+  type: 'bar',
+  data: {
+    labels: nbViolSorted.map(d => d.analysis_neighborhood),
+    datasets: [{
+      label: 'Avg violations',
+      data: nbViolSorted.map(d => d.avg_violations),
+      backgroundColor: '#85B7EB',
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { x: { title: { display: true, text: 'Avg violations per inspection' } } }
+  }
+});
+
+// Neighborhood table
+const nbTbody = document.getElementById('nbTable');
+nbSorted.forEach(d => {
+  const fr = d.failure_rate;
+  const pill = fr > 9 ? 'pill-red' : fr > 6 ? 'pill-amber' : 'pill-green';
+  nbTbody.innerHTML += `<tr>
+    <td>${d.analysis_neighborhood}</td>
+    <td>${d.total.toLocaleString()}</td>
+    <td><span class="pill ${pill}">${fr}%</span></td>
+    <td>${d.closure_rate}%</td>
+    <td>${d.avg_violations}</td>
+  </tr>`;
+});
+
+// Inspector bar
+const insSorted = [...ins].sort((a,b) => b.failure_rate - a.failure_rate);
+new Chart(document.getElementById('insChart'), {
+  type: 'bar',
+  data: {
+    labels: insSorted.map(d => d.inspector),
+    datasets: [{
+      label: 'Failure rate %',
+      data: insSorted.map(d => d.failure_rate),
+      backgroundColor: insSorted.map(d => d.failure_rate > AVG_FR ? '#E24B4A' : '#85B7EB'),
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { x: { title: { display: true, text: 'Failure rate (%)' } } }
+  }
+});
+
+// Inspector scatter
+new Chart(document.getElementById('insScatter'), {
+  type: 'scatter',
+  data: {
+    datasets: [{
+      label: 'Inspector',
+      data: ins.map(d => ({ x: d.avg_violations, y: d.failure_rate, label: d.inspector })),
+      backgroundColor: ins.map(d => d.failure_rate > AVG_FR ? 'rgba(226,75,74,0.7)' : 'rgba(55,138,221,0.7)'),
+      pointRadius: ins.map(d => Math.max(4, Math.sqrt(d.total) * 0.4)),
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => `${ctx.raw.label}: ${ctx.raw.y}% fail, ${ctx.raw.x} avg violations` } }
+    },
+    scales: {
+      x: { title: { display: true, text: 'Avg violations cited' } },
+      y: { title: { display: true, text: 'Failure rate (%)' } }
+    }
+  }
+});
+
+// DOW failure
+new Chart(document.getElementById('dowChart'), {
+  type: 'bar',
+  data: {
+    labels: dow.map(d => d.dow),
+    datasets: [{
+      label: 'Failure rate %',
+      data: dow.map(d => d.failure_rate),
+      backgroundColor: dow.map(d => d.failure_rate > AVG_FR ? '#E24B4A' : d.failure_rate > 4 ? '#EF9F27' : '#1D9E75'),
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { y: { title: { display: true, text: 'Failure rate (%)' } } }
+  }
+});
+
+// Monthly failure
+new Chart(document.getElementById('monthChart'), {
+  type: 'line',
+  data: {
+    labels: monthly.map(d => d.month_name),
+    datasets: [{
+      label: 'Failure rate %',
+      data: monthly.map(d => d.failure_rate),
+      borderColor: '#378ADD', backgroundColor: 'rgba(55,138,221,0.1)',
+      tension: 0.3, fill: true, pointRadius: 4,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { y: { title: { display: true, text: 'Failure rate (%)' } } }
+  }
+});
+
+// DOW violations
+new Chart(document.getElementById('dowViolChart'), {
+  type: 'bar',
+  data: {
+    labels: dow.map(d => d.dow),
+    datasets: [{ label: 'Avg violations', data: dow.map(d => d.avg_violations), backgroundColor: '#85B7EB' }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+});
+
+// Monthly violations
+new Chart(document.getElementById('monthViolChart'), {
+  type: 'line',
+  data: {
+    labels: monthly.map(d => d.month_name),
+    datasets: [{ label: 'Avg violations', data: monthly.map(d => d.avg_violations), borderColor: '#EF9F27', backgroundColor: 'rgba(239,159,39,0.1)', tension: 0.3, fill: true, pointRadius: 4 }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+});
+
+// Permit type
+new Chart(document.getElementById('ptChart'), {
+  type: 'bar',
+  data: {
+    labels: pt.map(d => d.label),
+    datasets: [
+      { label: 'Failure rate %', data: pt.map(d => d.failure_rate), backgroundColor: '#E24B4A' },
+      { label: 'Closure rate %', data: pt.map(d => d.closure_rate), backgroundColor: '#85B7EB' }
+    ]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: true, position: 'top' } },
+    scales: { x: { stacked: false, title: { display: true, text: 'Rate (%)' } } }
+  }
+});
+
+// Repeat table
+const rTbody = document.getElementById('repeatTable');
+repeat.forEach(d => {
+  const pill = d.closure_count >= 5 ? 'pill-red' : d.closure_count >= 4 ? 'pill-amber' : 'pill-blue';
+  rTbody.innerHTML += `<tr>
+    <td><strong>${d.dba}</strong></td>
+    <td>${d.neighborhood}</td>
+    <td style="font-size:11px;color:#888780">${d.permit_type.replace(/^H\d+ - /,'')}</td>
+    <td><span class="pill ${pill}">${d.closure_count}x</span></td>
+  </tr>`;
+});
+</script>
+</body>
+</html>
