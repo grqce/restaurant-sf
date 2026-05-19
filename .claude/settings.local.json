@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create *)",
+      "Bash(node *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(curl -s http://localhost:5173/restaurants.json)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'{len\\(d\\)} restaurants'\\); r=d[100]; print\\(r['name'], r['latestStatus'], r['latestViolationCount'], 'violations'\\); print\\('First violation:', r['latestViolations'][0] if r['latestViolations'] else 'none'\\)\")",
+      "Bash(python3 -c ' *)"
+    ]
+  }
+}

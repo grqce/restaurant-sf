@@ -1,0 +1,183 @@
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  background: #1a1a2e;
+  color: white;
+  padding: 28px 24px;
+}
+
+.headerInner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: rgba(255,255,255,0.55);
+  margin-top: 4px;
+}
+
+.controls {
+  background: white;
+  border-bottom: 1px solid #e5e5e5;
+  padding: 16px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.controls > * + * {
+  margin-top: 12px;
+}
+
+@media (min-width: 640px) {
+  .controls {
+    max-width: 100%;
+  }
+}
+
+.searchWrap {
+  position: relative;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: #999;
+  pointer-events: none;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 11px 40px 11px 42px;
+  border: 1.5px solid #ddd;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  outline: none;
+  background: #fafafa;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.searchInput:focus {
+  border-color: #4f46e5;
+  background: white;
+}
+
+.clearBtn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  font-size: 0.8rem;
+  padding: 4px;
+  line-height: 1;
+}
+
+.filters {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.statusPills {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1.5px solid #e0e0e0;
+  background: white;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: #555;
+  transition: all 0.12s;
+}
+
+.pill:hover {
+  border-color: #bbb;
+  color: #222;
+}
+
+.pillCount {
+  font-size: 0.72rem;
+  color: #999;
+  font-weight: 400;
+}
+
+.pillActive {
+  border-color: #4f46e5;
+  color: #4f46e5;
+  background: #eef2ff;
+}
+
+.pillActive .pillCount {
+  color: #818cf8;
+}
+
+.sortSelect {
+  margin-left: auto;
+  padding: 6px 10px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  color: #555;
+  background: white;
+  cursor: pointer;
+  outline: none;
+}
+
+.main {
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+  padding: 20px 24px 48px;
+}
+
+.resultCount {
+  font-size: 0.8rem;
+  color: #888;
+  margin-bottom: 14px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.empty {
+  text-align: center;
+  color: #999;
+  padding: 80px 0;
+  font-size: 1rem;
+}
